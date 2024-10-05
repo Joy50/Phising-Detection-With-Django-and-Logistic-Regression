@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body style="padding: 20px;">
+    <h1 style="text-align: center;">Predict Phishing with Logistic Regression</h1>
+    <form id="predictionForm" method="POST" action="{% url 'predict' %}" style="padding: 20px;">
+        {% csrf_token %}
+        <label for="input_data" class="form-label">Enter an URL:</label>
+        <input type="text" id="input_data" name="input_data" required class="form-control">
+        <br>
+        <button type="submit" class="btn btn-primary form-control">Predict</button>
+    </form>
+    <p id="result"></p>
+    
+    <script>
+        // Handle form submission using AJAX
+        document.getElementById('predictionForm').onsubmit = function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData(event.target);
+            
+            fetch("{% url 'predict' %}", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.prediction !== undefined) {
+                    if (data.prediction == 0){
+                        document.getElementById('result').innerText = 'Prediction: legitimate';
+                    }else{
+                        document.getElementById('result').innerText = 'Prediction: phishing';
+                    }
+                } else if (data.error) {
+                    document.getElementById('result').innerText = 'Error: ' + data.error;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        };
+    </script>
+</body>
+</html>
